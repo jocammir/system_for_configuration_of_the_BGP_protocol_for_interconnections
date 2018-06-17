@@ -1,0 +1,15 @@
+enable
+conf t
+username admin password admin
+enable password admin
+line vty 0 4
+login local
+transport input all
+int f0/0
+ip address 192.168.137.2 255.255.255.0
+no shutdown
+int s0/2/0
+clock rate 64000
+end
+debug telnet
+wr
