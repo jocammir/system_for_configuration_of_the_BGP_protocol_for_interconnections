@@ -10,7 +10,7 @@
 import wx
 import wx.xrc
 import easygui as eg
-import funciones_telnet
+import funcionesTelnet
 
 ###########################################################################
 ## Class principal
