@@ -4,7 +4,7 @@ import telnetlib
 import time
 
 
-#Funcion para realizar la conexion telnet con el router al que se va a aplicar el enrutamiento
+#Funcion para realizar la conexion telnet con el router al que se va a aplicar el enrutamiento#
 def conexion_telnet(ip,user,password):
     HOST = ip
 
