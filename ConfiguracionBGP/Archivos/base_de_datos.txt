@@ -1,0 +1,3 @@
+admin,admin
+jnagua,ap
+monitoreo, monitoreo
