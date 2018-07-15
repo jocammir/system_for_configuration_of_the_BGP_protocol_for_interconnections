@@ -355,7 +355,7 @@ class op1(wx.Frame):
     def realizar_conf_bas(self, event):
         host = str(self.hostname.GetLineText(0))
         if (host != ""):
-            funciones_telnet.configuracionBasica(tn, host)
+            funcionesTelnet.configuracionBasica(tn, host)
             msg = "CONFIGURACION BASICA ESTABLECIDA"
             titulo = "MENSAJE:"
             choices = ["OK"]
@@ -490,7 +490,7 @@ class op2(wx.Frame):
         remoto = str(self.numero_as_remoto.GetLineText(0))
         if (local != "") and (remoto != ""):
             self.mostrar.SetValue("Local: " + local + " Remoto: " + remoto)
-            funciones_telnet.SesionBGP(tn, local)
+            funcionesTelnet.SesionBGP(tn, local)
             print(local)
             print ("Se guardo el as")
             msg = "SE HA GUARDADO CORRECTAMENTE LOS NUMEROS AUTONOMOS"
@@ -509,9 +509,9 @@ class op2(wx.Frame):
         local = str(self.numero_as_local.GetLineText(0))
         remoto = str(self.numero_as_remoto.GetLineText(0))
 
-        flag = funciones_telnet.validarFormatoIP(vecino)
+        flag = funcionesTelnet.validarFormatoIP(vecino)
         if (flag and local != "" and remoto != ""):
-            funciones_telnet.configurarVecino(vecino, local, remoto, tn)
+            funcionesTelnet.configurarVecino(vecino, local, remoto, tn)
             print("se guardo correntamente")
             msg = "SE GUARDO CORRECTAMENTE"
             titulo = "MENSAJE:"
@@ -540,10 +540,10 @@ class op2(wx.Frame):
     #esta función recibe la redes a publicar y llama a la función configrarNetwork
     def con_red(self, event):
         red = str(self.network.GetLineText(0))
-        flag = funciones_telnet.validarFormatoIP(red)
+        flag = funcionesTelnet.validarFormatoIP(red)
         local = str(self.numero_as_local.GetLineText(0))
         if (flag):
-            funciones_telnet.configurarNetwork(tn, red, local)
+            funcionesTelnet.configurarNetwork(tn, red, local)
             print ("Se guardo la conexion de red ")
             msg = "SE GUARDO CORRECTAMENTE"
             titulo = "MENSAJE:"
