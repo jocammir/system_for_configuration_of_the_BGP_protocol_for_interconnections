@@ -378,7 +378,7 @@ class op1(wx.Frame):
 
     # Virtual event handlers, overide them in your derived class
 
-    #una vez dado click en el boton "CONFIGURACION BASICA", se ejecuta la funcion "configuracionBasica" importada del archivo "funciones_telnet.py"
+    #una vez dado click en el boton "CONFIGURACION BASICA", se ejecuta la funcion "configuracionBasica" importada del archivo "funcionesTelnet.py"
     def realizar_conf_bas(self, event):
         host = str(self.hostname.GetLineText(0))
         if (host != ""):
@@ -524,7 +524,7 @@ class op2(wx.Frame):
         pass
 
     # Virtual event handlers, overide them in your derived class
-    #Dado click en el boton de "GUARDAR AS", se emiten las lineas de comandos a traves de la funcion "SesionBGP" del archivo "funciones_telnet.py"
+    #Dado click en el boton de "GUARDAR AS", se emiten las lineas de comandos a traves de la funcion "SesionBGP" del archivo "funcionesTelnet.py"
     def guardarAS(self, event):
         local = str(self.numero_as_local.GetLineText(0))
         remoto = str(self.numero_as_remoto.GetLineText(0))
@@ -545,7 +545,7 @@ class op2(wx.Frame):
             reply = eg.buttonbox(msg2, title=titulo2, choices=choices2)
             print("error")
 
-    #Al dar click en el boton "CONFIGURAR VECINO", ejecuta la funcion "configurarVecino" alojado dentro del archivo "funciones_telnet.py"
+    #Al dar click en el boton "CONFIGURAR VECINO", ejecuta la funcion "configurarVecino" alojado dentro del archivo "funcionesTelnet.py"
     def vecinosGP(self, event):
         vecino = str(self.ip_vecino.GetLineText(0))
         local = str(self.numero_as_local.GetLineText(0))
@@ -584,10 +584,10 @@ class op2(wx.Frame):
         frame.Destroy()
         frame4.Destroy()
 
-    #Al dar click en el boton "CONFIGURAR REDES", se ejecuta la funcion "configurarNetwork" que se aloja en el archivo "funciones_telnet.py"
+    #Al dar click en el boton "CONFIGURAR REDES", se ejecuta la funcion "configurarNetwork" que se aloja en el archivo "funcionesTelnet.py"
     def con_red(self, event):
         red = str(self.network.GetLineText(0))
-        #Parametro que nos valida si el formato de la direccion de la red tiene un formato adecuado de los 4 octetos a traves de la funcion "validarFormatoIP" alojada en el archivo "funciones_telnet.py"
+        #Parametro que nos valida si el formato de la direccion de la red tiene un formato adecuado de los 4 octetos a traves de la funcion "validarFormatoIP" alojada en el archivo "funcionesTelnet.py"
         flag = funciones_telnet.validarFormatoIP(red)
         local = str(self.numero_as_local.GetLineText(0))
         if (flag):
