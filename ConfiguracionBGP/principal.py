@@ -94,7 +94,7 @@ class direccionIP(wx.Frame):
     def validar_IP(self, event):
         global tn
         try:
-            tn = funciones_telnet.conexion_telnet( str(self.user.GetLineText(0)), "admin", "admin")
+            tn = funcionesTelnet.conexion_telnet( str(self.user.GetLineText(0)), "admin", "admin")
             
             msg = "CONEXION ESTABLECIDA"
             titulo = "MENSAJE:"
@@ -113,7 +113,7 @@ class direccionIP(wx.Frame):
         frame7.Destroy()
 
 
-###########################################################################
+ ###########################################################################
 ## Class principal
 ###########################################################################
 
@@ -187,8 +187,8 @@ class principal(wx.Frame):
         self.btn_validar.Bind(wx.EVT_BUTTON, self.validar_ingreso)
         self.btn_salir1.Bind(wx.EVT_BUTTON, self.salir1)
 
-    def __del__(self):
-        pass
+        def __del__(self):
+            pass
 
     # esta función nos pide un usuario y password, comprueba que estén en la base de datos
     def validar_ingreso(self, event):
