@@ -1,12 +1,21 @@
 
 import wx.xrc
-from Ventanas.ventana_Emergente import *
 
 
+from ConfiguracionBGP.Ventanas.ventana_Emergente import *
 
 app = wx.App(False)
-frame = pantalla_Opciones(None)
-frame1 = pantalla_login(None)
-frame2 = configurar_BGP(None)
-frame2.Show(True)
+frame_pantalla_login = pantalla_login(None)
+frame_pantalla_Opciones= pantalla_Opciones(None)
+frame_configurar_BGP = configurar_BGP(None)
+frame_pantalla_login.Show(True)
 app.MainLoop()
+
+if(pantalla_login.salir):
+    print("Salir")
+    frame_pantalla_login.Destroy()
+
+    #
+
+
+

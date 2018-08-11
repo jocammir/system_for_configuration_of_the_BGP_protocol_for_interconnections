@@ -153,7 +153,7 @@ def all_users(conexion):
 
     #llenar las listas paralelas con la informacion de cada usuario
     for id_u,user,pwd in admins+monitoreo:
-        usuarios.append(u)
+        usuarios.append(user)
         contraseñas.append(pwd)
         ids_usuarios.append(id_u)
 
