@@ -1,5 +1,6 @@
 import telnetlib
 
+# import funciones_Sesion_BGP
 import conexion_mysql as sql
 
 #import ConfiguracionBGP.Base_de_Datos.conexion_mysql
@@ -37,6 +38,7 @@ def conexion_Telnet(host,user_Dispo,password_Dispo):
 #iniciar_Configuracion: Permite inicar una configuración
 #Parametros:
 # objeto_Telnet   (Telnet): objeto de conexión Telnet
+# hostname_Dispo   (str):  nombre del dispositivo
 # 
 #-------------------------------------------------------------------------------
 
@@ -133,8 +135,10 @@ def configurar_Interfaces(objeto_Telnet, nom_empresa,nom_Dispo_Especifico, usuar
     guardar_Configuracion(objeto_Telnet)
     print(nom_empresa+"->"+nom_Dispo_Especifico+"\nInterfaces configuradas con éxito")
 
-#Pruebas
-#tn=conexion_Telnet(HOST_Local,str("admin"),str("admin"))
+
+#Pruebas    
+#tn=conexion_Telnet(HOST_Remoto,str("admin"),str("admin"))
 #config_Plantilla_Basica(tn,str("RouterLoco"))
-#configurar_Interfaces(tn,str("RoutingSA"),str("RouterLocal"), str("jocelyn"), str("jocelyn"))
-    
+#configurar_Interfaces(tn,str("Telcotec"),str("RouterRemoto"), str("jocelyn"), str("jocelyn"))
+#tn1=conexion_Telnet(HOST_Remoto,str("admin"),str("admin"))    
+#config_Vecino(tn1, "209.165.200.2", "65002","65003","0.0.0.0","Remoto")
