@@ -11,6 +11,8 @@ import wx.xrc
 import easygui as eg
 from Imagenes import *
 
+import ConfiguracionBGP.Dispositivo.conexion_Telnet
+
 
 ###########################################################################
 ## Class principal
@@ -142,6 +144,7 @@ class principal(wx.Frame):
 
         self.user = wx.TextCtrl(sbSizer11.GetStaticBox(), wx.ID_ANY, u"user", wx.DefaultPosition, wx.DefaultSize, 0)
         gbSizer8.Add(self.user, wx.GBPosition(0, 1), wx.GBSpan(1, 1), wx.ALL, 5)
+        self.user.
 
         self.password1234 = wx.StaticText(sbSizer11.GetStaticBox(), wx.ID_ANY, u"PASSWORD", wx.DefaultPosition,
                                           wx.DefaultSize, 0)
@@ -355,7 +358,7 @@ class op1(wx.Frame):
     def realizar_conf_bas(self, event):
         host = str(self.hostname.GetLineText(0))
         if (host != ""):
-            funcionesTelnet.configuracionBasica(tn, host)
+            ConfiguracionBGP.conexion_Telnet.configuracionBasica(tn, host)
             msg = "CONFIGURACION BASICA ESTABLECIDA"
             titulo = "MENSAJE:"
             choices = ["OK"]
@@ -490,7 +493,7 @@ class op2(wx.Frame):
         remoto = str(self.numero_as_remoto.GetLineText(0))
         if (local != "") and (remoto != ""):
             self.mostrar.SetValue("Local: " + local + " Remoto: " + remoto)
-            funcionesTelnet.SesionBGP(tn, local)
+            ConfiguracionBGP.conexion_Telnet.SesionBGP(tn, local)
             print(local)
             print ("Se guardo el as")
             msg = "SE HA GUARDADO CORRECTAMENTE LOS NUMEROS AUTONOMOS"
@@ -563,5 +566,5 @@ frame = principal(None)
 frame2 = opciones(None)
 frame3 = op1(None)
 frame4 = op2(None)
-frame7.Show(True)
+frame.Show(True)
 app.MainLoop()

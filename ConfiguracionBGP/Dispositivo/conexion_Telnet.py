@@ -1,7 +1,12 @@
 import telnetlib
 
-import ConfiguracionBGP.Base_de_Datos.conexion_mysql
+import conexion_mysql as sql
 
+#import ConfiguracionBGP.Base_de_Datos.conexion_mysql
+
+HOST_Loopback=str('192.168.100.254')
+HOST_Local=str("192.168.100.1")
+HOST_Remoto=str("192.168.100.2")
 
 #===============================================================================
 #conexion_Telnet: realiza la conexión a telnet con el Router a configurar
@@ -14,17 +19,44 @@ import ConfiguracionBGP.Base_de_Datos.conexion_mysql
 #          -1   -- cuando la conexion falla
 #-------------------------------------------------------------------------------
 
-def conexion_Telnet(ip,user_Dispo,password_Dispo):
-    host = ip
+def conexion_Telnet(host,user_Dispo,password_Dispo):
     try:
         objeto_Telnet = telnetlib.Telnet(host,port='23')
-        objeto_Telnet.write(user_Dispo + "\n")
-        objeto_Telnet.write(password_Dispo + "\n")
+        objeto_Telnet.open(host, port='23')
+        user = str(user_Dispo + "\n")
+        password = str(password_Dispo + "\n")
+        objeto_Telnet.write(user.encode('ascii'))
+        objeto_Telnet.write(password.encode('ascii'))
+        print("Conexion Telnet realizada con exito\n")
         return(objeto_Telnet)
-        print("Conexion Telnet realizada con exito")
     except:
         print("Error al establecer conexión Telnet")
 
+
+#===============================================================================
+#iniciar_Configuracion: Permite inicar una configuración
+#Parametros:
+# objeto_Telnet   (Telnet): objeto de conexión Telnet
+# 
+#-------------------------------------------------------------------------------
+
+def iniciar_Configuracion(objeto_Telnet):
+    objeto_Telnet.write("enable\n".encode('ascii'))
+    objeto_Telnet.write("conf t\n".encode('ascii'))
+    
+
+#===============================================================================
+#guardar_Configuracion: guarda en memoria las configuraciones realizadas
+#Parametros:
+# objeto_Telnet   (Telnet): objeto de conexión Telnet
+#
+#-------------------------------------------------------------------------------
+    
+def guardar_Configuracion(objeto_Telnet):
+    objeto_Telnet.write("end\n".encode('ascii'))
+    objeto_Telnet.write("wr\n".encode('ascii'))
+    objeto_Telnet.write("\n".encode('ascii'))
+    
 #===============================================================================
 #config_Plantilla_Basica: configuración básica de un router
 #Parametros:
@@ -33,10 +65,10 @@ def conexion_Telnet(ip,user_Dispo,password_Dispo):
 #
 #-------------------------------------------------------------------------------
 
-def config_Plantilla_Basica(objeto_Telnet, hostname_Dispo):
-    objeto_Telnet.write("enable\n".encode('ascii'))
-    objeto_Telnet.write("conf t\n".encode('ascii'))
-    objeto_Telnet.write("hostname "+hostname_Dispo+"\n")
+def config_Plantilla_Basica(objeto_Telnet,hostname_Dispo):
+    iniciar_Configuracion(objeto_Telnet)
+    nombre_Host=str("hostname "+hostname_Dispo+"\n")
+    objeto_Telnet.write(nombre_Host.encode('ascii'))
     objeto_Telnet.write("ip domain-name fiec.espol.edu.ec\n".encode('ascii'))
     objeto_Telnet.write("ip name-server 192.168.1.17\n".encode('ascii'))
     objeto_Telnet.write("ip name-server 192.168.1.19\n".encode('ascii'))
@@ -52,10 +84,7 @@ def config_Plantilla_Basica(objeto_Telnet, hostname_Dispo):
     objeto_Telnet.write("login local\n".encode('ascii'))
     objeto_Telnet.write("exec-timeout 3 3\n".encode('ascii'))
     objeto_Telnet.write("logging synchronous\n".encode('ascii'))
-    configurar_Interfaces(objeto_Telnet,hostname_Dispo)
-    objeto_Telnet.write("end\n".encode('ascii'))
-    objeto_Telnet.write("wr\n".encode('ascii'))
-    objeto_Telnet.write("\n".encode('ascii'))
+    guardar_Configuracion(objeto_Telnet)
 
 
 #===============================================================================
@@ -68,22 +97,44 @@ def config_Plantilla_Basica(objeto_Telnet, hostname_Dispo):
 #
 #-------------------------------------------------------------------------------
 
-def configurar_Interfaces(objeto_Telnet, id_empresa, usuario, contraseña):
-    conex_BD = ConfiguracionBGP.sql.validar_conexion()
-    sesion = ConfiguracionBGP.sql.establecer_sesion(conex_BD, usuario, contraseña)
-    #id_empresas, nombres, ASNs = ConfiguracionBGP.sql.all_empresas(conex_BD)
-    dispositivos = ConfiguracionBGP.sql.consultar_devices_empresa(conex_BD, sesion, id_empresa)
+def configurar_Interfaces(objeto_Telnet, nom_empresa,nom_Dispo_Especifico, usuario, contraseña):
+    conex_BD = sql.validar_conexion()
+    config_Plantilla_Basica(objeto_Telnet,nom_Dispo_Especifico)
+    sesion = sql.establecer_sesion(conex_BD, usuario, contraseña)
+    id_empresas, nombres, ASNs = sql.all_empresas(conex_BD)
+    
+    try:
+        id_empresa=""
+        id_Dispo_Especifico=""
+        for i in range(len(nombres)):
+            if (nombres[i]==nom_empresa.strip()):
+                id_empresa=id_empresas[i]
+            
+        list_Dispositivos = sql.consultar_devices_empresa(conex_BD, sesion, id_empresa)
+        for id_Dispositivo,nom_Dispositivo,gateway_Dispo in list_Dispositivos:
+            if(nom_Dispositivo==nom_Dispo_Especifico.strip()):
+                id_Dispo_Especifico=id_Dispositivo
+        
+        lista_Interfaces_Dispo= sql.consultar_interfaces(conex_BD,id_Dispo_Especifico)
+    
+    
+        for interfaz in lista_Interfaces_Dispo:
+            nom_Interfaz = str("int "+interfaz[0]+"\n")
+            ip_Interfaz = str(interfaz[1])
+            mascara_Interfaz = str(interfaz[2]+"\n")
+            ip_Adress=str("ip address "+ip_Interfaz+" "+mascara_Interfaz)
+        
+            objeto_Telnet.write(nom_Interfaz.encode('ascii'))
+            objeto_Telnet.write(ip_Adress.encode('ascii'))
+            objeto_Telnet.write("no shutdown\n".encode('ascii'))
+            objeto_Telnet.write("exit\n".encode('ascii'))
+    except:
+        print("Empresa o dispositivo incorrectos")
+    guardar_Configuracion(objeto_Telnet)
+    print(nom_empresa+"->"+nom_Dispo_Especifico+"\nInterfaces configuradas con éxito")
 
-    for idDispositivo, nombre, gateway in dispositivos:
-        id_dispositivo = dispositivos[id_empresa][0]
-        lista_Interfaces_Dispo= ConfiguracionBGP.consultar_interfaces(conex_BD,id_dispositivo)
-
-    for interfaz in lista_Interfaces_Dispo:
-        nom_Interfaz = interfaz[0]
-        ip_Interfaz = interfaz[1]
-        mascara_Interfaz = interfaz[2]
-
-        objeto_Telnet.write("int "+nom_Interfaz+"\n".encode('ascii'))
-        objeto_Telnet.write("ip address "+ip_Interfaz+" "+mascara_Interfaz+"\n".encode('ascii'))
-        objeto_Telnet.write("no shutdown\n".encode('ascii'))
-        objeto_Telnet.write("exit\n".encode('ascii'))
+#Pruebas
+#tn=conexion_Telnet(HOST_Local,str("admin"),str("admin"))
+#config_Plantilla_Basica(tn,str("RouterLoco"))
+#configurar_Interfaces(tn,str("RoutingSA"),str("RouterLocal"), str("jocelyn"), str("jocelyn"))
+    
