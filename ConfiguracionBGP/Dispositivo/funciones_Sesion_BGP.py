@@ -7,7 +7,7 @@
 #-------------------------------------------------------------------------------
 
 def sesion_BGP(objeto_Telnet,Sistema_Autonomo):
-    iniciar_Configuracion(objeto_Telnet)
+    
     ingreso_Router=str("router bgp "+Sistema_Autonomo+"\n")
     print(ingreso_Router)
     objeto_Telnet.write(ingreso_Router.encode('ascii'))
@@ -42,9 +42,11 @@ def configurar_Network(objeto_Telnet,lista_Networks):
             red=str("network "+ network+"\n")
             objeto_Telnet.write(red.encode('ascii'))
         else:
-            red_Y_mask=str("network "+network+" mask 255.255.255.0 \n")
+            red=network.split('-')
+            red_Y_mask=str("network "+red[0]+" mask "+red[1]+"\n")
+            print (red_Y_mask)
             objeto_Telnet.write(red_Y_mask.encode('ascii'))
-    guardar_Configuracion(objeto_Telnet)
+    
 
 #===============================================================================
 #config_Vecino: Configura el router vecino con su AS
@@ -60,20 +62,31 @@ def configurar_Network(objeto_Telnet,lista_Networks):
 #-------------------------------------------------------------------------------
 
 
-def config_Vecino(objeto_Telnet,ip_Vecino,AS_Local,AS_Remoto,lista_Networks,var_Local):
-    if(es_Local(var_Local)):
-        sesion_BGP(objeto_Telnet,AS_Local)
-        objeto_Telnet.write("\n".encode('ascii'))
-        vecino=str("neighbor " +ip_Vecino+ " remote-as "+AS_Remoto+"\n")
-        objeto_Telnet.write(vecino.encode('ascii'))
-        configurar_Network(objeto_Telnet,lista_Networks)
+def config_Vecino(objeto_Telnet,ip_local,ip_Vecino,AS_Local,AS_Remoto,lista_NetworksL,lista_NetworksR,usuario,contraseña):
+    sesion_BGP(objeto_Telnet,AS_Local)
+    objeto_Telnet.write("\n".encode('ascii'))
+    vecino=str("neighbor " +ip_Vecino+ " remote-as "+AS_Remoto+"\n")
+    objeto_Telnet.write(vecino.encode('ascii'))
+    configurar_Network(objeto_Telnet,lista_NetworksL)
+
+    objeto_Telnet.write("end\n".encode('ascii'))
+    objeto_Telnet.write("wr\n".encode('ascii'))
+    objeto_Telnet.write("\n".encode('ascii'))
         
-    else:
-        objeto_Telnet.write("ip route 0.0.0.0 0.0.0.0 lo0 name to_core_isp \n".encode('ascii'))
-        sesion_BGP(objeto_Telnet,AS_Remoto)
-        vecino_Local=str("neighbor " +ip_Vecino+ " remote-as "+AS_Local+"\n")
-        objeto_Telnet.write(vecino_Local.encode('ascii'))
-        configurar_Network(objeto_Telnet,lista_Networks)
+    objeto_Telnet.write(("telnet {}\n").format(ip_Vecino).encode('ascii'))
+    objeto_Telnet.write(("{}\n").format(usuario).encode('ascii'))
+    objeto_Telnet.write(("{}\n").format(contraseña).encode('ascii'))
+
+    
+    objeto_Telnet.write("enable \n".encode('ascii'))
+    objeto_Telnet.write("config t\n".encode('ascii'))
+        
+    objeto_Telnet.write("ip route 0.0.0.0 0.0.0.0 lo0 name to_core_isp \n".encode('ascii'))
+    sesion_BGP(objeto_Telnet,AS_Remoto)
+    vecino_Local=str("neighbor " +ip_local+ " remote-as "+AS_Local+"\n")
+    objeto_Telnet.write(vecino_Local.encode('ascii'))
+    configurar_Network(objeto_Telnet,lista_NetworksR)
     print("Se configuró BGP con éxito")
+
 
 

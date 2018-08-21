@@ -1,13 +1,12 @@
 import telnetlib
-
-# import funciones_Sesion_BGP
+import funciones_Sesion_BGP as BGP
 import conexion_mysql as sql
 
 #import ConfiguracionBGP.Base_de_Datos.conexion_mysql
 
 HOST_Loopback=str('192.168.100.254')
-HOST_Local=str("192.168.100.1")
-HOST_Remoto=str("192.168.100.2")
+HOST_Local=str("192.168.101.11")
+HOST_Remoto=str("209.165.200.1")
 
 #===============================================================================
 #conexion_Telnet: realiza la conexión a telnet con el Router a configurar
@@ -31,7 +30,7 @@ def conexion_Telnet(host,user_Dispo,password_Dispo):
         print("Conexion Telnet realizada con exito\n")
         return(objeto_Telnet)
     except:
-        print("Error al establecer conexión Telnet")
+        return -1
 
 
 #===============================================================================
@@ -67,14 +66,18 @@ def guardar_Configuracion(objeto_Telnet):
 #
 #-------------------------------------------------------------------------------
 
-def config_Plantilla_Basica(objeto_Telnet,hostname_Dispo):
+def config_Plantilla_Basica(objeto_Telnet,hostname_Dispo,conexion):
     iniciar_Configuracion(objeto_Telnet)
     nombre_Host=str("hostname "+hostname_Dispo+"\n")
     objeto_Telnet.write(nombre_Host.encode('ascii'))
     objeto_Telnet.write("ip domain-name fiec.espol.edu.ec\n".encode('ascii'))
     objeto_Telnet.write("ip name-server 192.168.1.17\n".encode('ascii'))
     objeto_Telnet.write("ip name-server 192.168.1.19\n".encode('ascii'))
-    objeto_Telnet.write("username monitoreo privilege 5 secret monitoreo\n".encode('ascii'))
+    id_usuarios,usuarios,contraseñas=sql.all_users(conexion)
+    for i in range(len(usuarios)):
+        user=usuarios[i]
+        passwd=contraseñas[i]
+        objeto_Telnet.write("username {} privilege 15 secret {}\n".format(user,passwd).encode('ascii'))
     objeto_Telnet.write("banner motd #ACCESO SOLO A PERSONAL AUTORIZADO#\n".encode('ascii'))
     objeto_Telnet.write("line vty 0 4\n".encode('ascii'))
     objeto_Telnet.write("transport input all\n".encode('ascii'))
@@ -136,9 +139,16 @@ def configurar_Interfaces(objeto_Telnet, nom_empresa,nom_Dispo_Especifico, usuar
     print(nom_empresa+"->"+nom_Dispo_Especifico+"\nInterfaces configuradas con éxito")
 
 
-#Pruebas    
-#tn=conexion_Telnet(HOST_Remoto,str("admin"),str("admin"))
-#config_Plantilla_Basica(tn,str("RouterLoco"))
-#configurar_Interfaces(tn,str("Telcotec"),str("RouterRemoto"), str("jocelyn"), str("jocelyn"))
-#tn1=conexion_Telnet(HOST_Remoto,str("admin"),str("admin"))    
-#config_Vecino(tn1, "209.165.200.2", "65002","65003","0.0.0.0","Remoto")
+#Pruebas
+conn=sql.realizar_conexion()
+if conn==-1:
+    print("nel")
+else:
+    listaL= ["192.168.101.0"]
+    listaR= ["0.0.0.0"]
+    tn1=conexion_Telnet(HOST_Local,"admin","admin")
+    iniciar_Configuracion(tn1)
+    BGP.config_Vecino(tn1, "209.165.200.2","209.165.200.1", "65000","65001",listaL,listaR,"admin","admin")
+    guardar_Configuracion(tn1)
+    sql.cerrar_conexion(conn)
+
